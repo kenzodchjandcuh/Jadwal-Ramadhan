@@ -31,50 +31,128 @@ function updateClock() {
     document.getElementById('clock-date').innerText = dateString;
 }
 
-function updateCountdown() {
-    const ramadhanStart = new Date('2026-02-19T00:00:00').getTime();
-    const ramadhanEnd = new Date('2026-03-20T23:59:59').getTime();
-    const now = new Date().getTime();
 
-    if (now < ramadhanStart) {
-        // Before Ramadhan - show countdown
-        document.querySelector('.countdown').style.display = 'flex';
-        document.querySelector('.clock').style.display = 'none';
-        document.getElementById('viewScheduleBtn').style.display = 'block';
 
-        const gap = ramadhanStart - now;
-        const days = Math.floor(gap / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((gap % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((gap % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((gap % (1000 * 60)) / 1000);
+function showFireworksAndWelcome() {
+  // Remove existing fireworks if any
+  const oldFireworks = document.getElementById('fireworksContainer');
+  if (oldFireworks) oldFireworks.remove();
 
-        document.getElementById('days').innerText = String(days).padStart(2, '0');
-        document.getElementById('hours').innerText = String(hours).padStart(2, '0');
-        document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
-        document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
-        document.querySelector('.message').innerText = '✨ Selamat Menyambut Bulan Ramadhan ✨';
-    } else if (now <= ramadhanEnd) {
-        // During Ramadhan - show clock
-        document.querySelector('.countdown').style.display = 'none';
-        document.querySelector('.clock').style.display = 'flex';
-        document.getElementById('viewScheduleBtn').style.display = 'block';
+  // Create fireworks container
+  const fireworks = document.createElement('div');
+  fireworks.id = 'fireworksContainer';
+  fireworks.style.position = 'fixed';
+  fireworks.style.top = '0';
+  fireworks.style.left = '0';
+  fireworks.style.width = '100vw';
+  fireworks.style.height = '100vh';
+  fireworks.style.pointerEvents = 'none';
+  fireworks.style.zIndex = '9999';
+  document.body.appendChild(fireworks);
 
-        updateClock();
-        if (!userHasToggled) {
-            scheduleVisible = true;
-            document.querySelector('.schedule').style.display = 'block';
-            loadSchedule();
-        }
-        document.querySelector('.message').innerText = '🎉 Selamat Menjalankan Ibadah Puasa 🎉';
-    } else {
-        // After Ramadhan - show clock
-        document.querySelector('.countdown').style.display = 'none';
-        document.querySelector('.clock').style.display = 'flex';
-        document.getElementById('viewScheduleBtn').style.display = 'block';
+  // Prepare firework sound
+  // Fireworks for 30 seconds (no sound)
+  let fireworksActive = true;
+  const startTime = Date.now();
+  function launchFireworkBurst() {
+    if (!fireworksActive) return;
 
-        updateClock();
-        document.querySelector('.message').innerText = '✨ Ramadhan Telah Berakhir, Tetap Jaga Kebaikan ✨';
+    const cx = 20 + Math.random()*60; // 20% - 80% horizontal
+    const cy = 25 + Math.random()*50; // 25% - 75% vertical
+    const particleCount = 18 + Math.floor(Math.random()*12); // 18-30 particles
+    for (let i = 0; i < particleCount; i++) {
+      const firework = document.createElement('div');
+      const angle = (i / particleCount) * 2 * Math.PI;
+      const color = `hsl(${Math.floor(Math.random()*360)}, 100%, 60%)`;
+      const size = 7 + Math.random()*7;
+      firework.style.position = 'absolute';
+      firework.style.left = cx + '%';
+      firework.style.top = cy + '%';
+      firework.style.width = size + 'px';
+      firework.style.height = size + 'px';
+      firework.style.borderRadius = '50%';
+      firework.style.background = color;
+      firework.style.boxShadow = `0 0 18px 6px ${color}`;
+      firework.style.transform = 'translate(-50%, -50%)';
+      firework.style.opacity = '0.95';
+      firework.animate([
+        { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+        { transform: `translate(-50%, -50%) translate(${Math.cos(angle)*140}px, ${Math.sin(angle)*140}px) scale(1.7)`, opacity: 0 }
+      ], {
+        duration: 1200 + Math.random()*700,
+        easing: 'cubic-bezier(.5,0,.5,1)',
+        fill: 'forwards'
+      });
+      fireworks.appendChild(firework);
     }
+    // Jadwalkan burst berikutnya
+    if (Date.now() - startTime < 30000) {
+      setTimeout(launchFireworkBurst, 500 + Math.random()*600);
+    } else {
+      fireworksActive = false;
+      setTimeout(() => {
+        if (fireworks.parentNode) fireworks.parentNode.removeChild(fireworks);
+      }, 3500);
+    }
+  }
+  launchFireworkBurst();
+}
+
+let hasShownFireworks = false;
+
+function updateCountdown() {
+  const ramadhanStart = new Date('2026-02-19T00:00:00').getTime();
+  const ramadhanEnd = new Date('2026-03-20T23:59:59').getTime();
+  const now = new Date().getTime();
+
+  if (now < ramadhanStart) {
+    // Before Ramadhan - show countdown
+    document.querySelector('.countdown').style.display = 'flex';
+    document.querySelector('.clock').style.display = 'none';
+    document.getElementById('viewScheduleBtn').style.display = 'block';
+
+    const gap = ramadhanStart - now;
+    const days = Math.floor(gap / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((gap % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((gap % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((gap % (1000 * 60)) / 1000);
+
+    document.getElementById('days').innerText = String(days).padStart(2, '0');
+    document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+    document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
+    document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+    document.querySelector('.message').innerText = '✨ Selamat Menyambut Bulan Ramadhan ✨';
+    hasShownFireworks = false;
+  } else if (now <= ramadhanEnd) {
+    // During Ramadhan - show clock
+    document.querySelector('.countdown').style.display = 'none';
+    document.querySelector('.clock').style.display = 'flex';
+    document.getElementById('viewScheduleBtn').style.display = 'block';
+
+    // Show fireworks and welcome message only once
+    if (!hasShownFireworks) {
+      showFireworksAndWelcome();
+      document.querySelector('.message').innerHTML = '<span style="font-size:2rem;color:#ffeb3b;text-shadow:0 0 20px #ffa500;">Selamat Datang Bulan Suci Ramadhan!</span>';
+      hasShownFireworks = true;
+    } else {
+      document.querySelector('.message').innerText = '🎉 Selamat Menjalankan Ibadah Puasa 🎉';
+    }
+
+    updateClock();
+    if (!userHasToggled) {
+      scheduleVisible = true;
+      document.querySelector('.schedule').style.display = 'block';
+      loadSchedule();
+    }
+  } else {
+    // After Ramadhan - show clock
+    document.querySelector('.countdown').style.display = 'none';
+    document.querySelector('.clock').style.display = 'flex';
+    document.getElementById('viewScheduleBtn').style.display = 'block';
+
+    updateClock();
+    document.querySelector('.message').innerText = '✨ Ramadhan Telah Berakhir, Tetap Jaga Kebaikan ✨';
+  }
 }
 
 document.getElementById('viewScheduleBtn').addEventListener('click', function() {
