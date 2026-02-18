@@ -508,6 +508,62 @@ function loadFullSchedule() {
   });
   scheduleTable.innerHTML = html;
   document.querySelector('.schedule-title').innerText = 'Jadwal Imsakiyah Lengkap Kota Lubuklinggau - Ramadhan 2026/1447 H';
+
+
+  // Countdown sholat berurutan: imsak, subuh, zuhur, ashar, maghrib, isya
+  const sholatOrder = [
+    { key: 'imsak', label: 'Imsak' },
+    { key: 'subuh', label: 'Subuh' },
+    { key: 'zuhur', label: 'Zuhur' },
+    { key: 'asar', label: 'Ashar' },
+    { key: 'magrib', label: 'Maghrib' },
+    { key: 'isya', label: 'Isya' }
+  ];
+
+  function updateSholatCountdown() {
+    const now = new Date();
+    const startDate = new Date('2026-02-19');
+    let diffTime = now - startDate;
+    let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    let schedule = jadwalRamadan.find(day => day.hari === diffDays);
+    // Jika tidak ketemu, fallback ke hari terakhir
+    if (!schedule) {
+      schedule = jadwalRamadan[jadwalRamadan.length - 1];
+      diffDays = jadwalRamadan.length;
+    }
+
+    let nextSholat = null;
+    let targetTime = null;
+    for (let i = 0; i < sholatOrder.length; i++) {
+      const { key, label } = sholatOrder[i];
+      let [hour, minute] = schedule[key].split(":").map(Number);
+      let target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0);
+      if (now < target) {
+        nextSholat = label;
+        targetTime = target;
+        break;
+      }
+    }
+    // Jika semua waktu sholat hari ini sudah lewat, ambil jadwal besok
+    if (!nextSholat) {
+      let besokSchedule = jadwalRamadan.find(day => day.hari === diffDays + 1) || jadwalRamadan[jadwalRamadan.length - 1];
+      // Ambil sholat pertama besok (imsak)
+      let [hour, minute] = besokSchedule[sholatOrder[0].key].split(":").map(Number);
+      targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, hour, minute, 0, 0);
+      nextSholat = sholatOrder[0].label;
+    }
+
+    const diff = targetTime - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    document.getElementById('countdown-timer').textContent =
+      `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    document.querySelector('#sholat-countdown h2').textContent = `Hitung Mundur Waktu ${nextSholat}`;
+  }
+
+  setInterval(updateSholatCountdown, 1000);
+  updateSholatCountdown();
 }
 
 function loadSchedule(isFull = false) {
