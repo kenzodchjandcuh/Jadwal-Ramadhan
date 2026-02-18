@@ -11,14 +11,15 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    min-height: 100vh;
+    /* Hapus display:flex agar scroll aktif */
+    /* display: flex; */
+    /* justify-content: center; */
+    /* align-items: center; */
     background: linear-gradient(135deg, #0f0f2e 0%, #1a0f4e 25%, #2d0a5e 50%, #1a0f4e 75%, #0f0f2e 100%);
     background-size: 400% 400%;
     animation: gradientShift 15s ease infinite;
-    overflow: hidden;
+    overflow: auto;
     position: relative;
 }
 

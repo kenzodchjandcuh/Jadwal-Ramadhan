@@ -12,90 +12,31 @@ function createStars() {
     }
 }
 
-function updateClock() {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('id-ID', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-    const dateString = now.toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
 
-    document.getElementById('clock-time').innerText = timeString;
-    document.getElementById('clock-date').innerText = dateString;
+function updateClock() {
+  const now = new Date();
+  const timeString = now.toLocaleTimeString('id-ID', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+  const dateString = now.toLocaleDateString('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  document.getElementById('clock-time').innerText = timeString;
+  document.getElementById('clock-date').innerText = dateString;
+  requestAnimationFrame(updateClock);
 }
 
 
 
 function showFireworksAndWelcome() {
-  // Remove existing fireworks if any
-  const oldFireworks = document.getElementById('fireworksContainer');
-  if (oldFireworks) oldFireworks.remove();
-
-  // Create fireworks container
-  const fireworks = document.createElement('div');
-  fireworks.id = 'fireworksContainer';
-  fireworks.style.position = 'fixed';
-  fireworks.style.top = '0';
-  fireworks.style.left = '0';
-  fireworks.style.width = '100vw';
-  fireworks.style.height = '100vh';
-  fireworks.style.pointerEvents = 'none';
-  fireworks.style.zIndex = '9999';
-  document.body.appendChild(fireworks);
-
-  // Prepare firework sound
-  // Fireworks for 30 seconds (no sound)
-  let fireworksActive = true;
-  const startTime = Date.now();
-  function launchFireworkBurst() {
-    if (!fireworksActive) return;
-
-    const cx = 20 + Math.random()*60; // 20% - 80% horizontal
-    const cy = 25 + Math.random()*50; // 25% - 75% vertical
-    const particleCount = 18 + Math.floor(Math.random()*12); // 18-30 particles
-    for (let i = 0; i < particleCount; i++) {
-      const firework = document.createElement('div');
-      const angle = (i / particleCount) * 2 * Math.PI;
-      const color = `hsl(${Math.floor(Math.random()*360)}, 100%, 60%)`;
-      const size = 7 + Math.random()*7;
-      firework.style.position = 'absolute';
-      firework.style.left = cx + '%';
-      firework.style.top = cy + '%';
-      firework.style.width = size + 'px';
-      firework.style.height = size + 'px';
-      firework.style.borderRadius = '50%';
-      firework.style.background = color;
-      firework.style.boxShadow = `0 0 18px 6px ${color}`;
-      firework.style.transform = 'translate(-50%, -50%)';
-      firework.style.opacity = '0.95';
-      firework.animate([
-        { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-        { transform: `translate(-50%, -50%) translate(${Math.cos(angle)*140}px, ${Math.sin(angle)*140}px) scale(1.7)`, opacity: 0 }
-      ], {
-        duration: 1200 + Math.random()*700,
-        easing: 'cubic-bezier(.5,0,.5,1)',
-        fill: 'forwards'
-      });
-      fireworks.appendChild(firework);
-    }
-    // Jadwalkan burst berikutnya
-    if (Date.now() - startTime < 30000) {
-      setTimeout(launchFireworkBurst, 500 + Math.random()*600);
-    } else {
-      fireworksActive = false;
-      setTimeout(() => {
-        if (fireworks.parentNode) fireworks.parentNode.removeChild(fireworks);
-      }, 3500);
-    }
-  }
-  launchFireworkBurst();
+  // Hanya tampilkan ucapan selamat datang bulan suci ramadhan tanpa kembang api
+  // (Efek kembang api dihapus sesuai permintaan)
 }
 
 let hasShownFireworks = false;
@@ -155,8 +96,19 @@ function updateCountdown() {
   }
 }
 
+
 document.getElementById('viewScheduleBtn').addEventListener('click', function() {
+  // Toggle tampil/sembunyi jadwal
+  const scheduleDiv = document.querySelector('.schedule');
+  if (!scheduleDiv) return;
+  if (scheduleDiv.style.display === 'block' || scheduleDiv.style.display === '') {
+    scheduleDiv.style.display = 'none';
+    this.innerText = 'Lihat Jadwal Imsak';
+  } else {
+    scheduleDiv.style.display = 'block';
     loadFullSchedule();
+    this.innerText = 'Tutup Jadwal Imsak';
+  }
 });
 
 const jadwalRamadan = [
@@ -522,38 +474,40 @@ const jadwalRamadan = [
   }
 ];
 
+
 function loadFullSchedule() {
-    const scheduleTable = document.querySelector('.schedule-table');
-    scheduleTable.innerHTML = ''; // Clear previous
-
-    jadwalRamadan.forEach(day => {
-        // Add day header
-        const dayHeader = document.createElement('div');
-        dayHeader.className = 'schedule-day-header';
-        dayHeader.innerHTML = `<h3>Hari ${day.hari} - ${day.tanggal}</h3>`;
-        scheduleTable.appendChild(dayHeader);
-
-        const scheduleItems = [
-            { label: 'Imsak', time: day.imsak },
-            { label: 'Subuh', time: day.subuh },
-            { label: 'Zuhur', time: day.zuhur },
-            { label: 'Ashar', time: day.asar },
-            { label: 'Maghrib', time: day.magrib },
-            { label: 'Isya', time: day.isya }
-        ];
-
-        scheduleItems.forEach(item => {
-            const row = document.createElement('div');
-            row.className = 'schedule-row';
-            row.innerHTML = `
-                <span class="schedule-label">${item.label}</span>
-                <span class="schedule-time">${item.time}</span>
-            `;
-            scheduleTable.appendChild(row);
-        });
-    });
-
-    document.querySelector('.schedule-title').innerText = 'Jadwal Imsakiyah Lengkap Kota Lubuklinggau - Ramadhan 2026/1447 H';
+  const scheduleTable = document.querySelector('.schedule-table');
+  scheduleTable.innerHTML = '';
+  let html = '';
+  jadwalRamadan.forEach(day => {
+    html += `<table class="jadwal-table" style="margin-bottom:16px;width:100%;border-collapse:collapse;background:#fff1;border-radius:8px;overflow:hidden;">
+      <thead>
+        <tr style="background:#ffeb3b;color:#222;">
+          <th colspan="7" style="padding:8px 0;font-size:1.1em;">Hari ${day.hari} - ${day.tanggal}</th>
+        </tr>
+        <tr style="background:#222;color:#fff;">
+          <th style="padding:4px 0;">Imsak</th>
+          <th>Subuh</th>
+          <th>Zuhur</th>
+          <th>Ashar</th>
+          <th>Maghrib</th>
+          <th>Isya</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="text-align:center;">
+          <td>${day.imsak}</td>
+          <td>${day.subuh}</td>
+          <td>${day.zuhur}</td>
+          <td>${day.asar}</td>
+          <td>${day.magrib}</td>
+          <td>${day.isya}</td>
+        </tr>
+      </tbody>
+    </table>`;
+  });
+  scheduleTable.innerHTML = html;
+  document.querySelector('.schedule-title').innerText = 'Jadwal Imsakiyah Lengkap Kota Lubuklinggau - Ramadhan 2026/1447 H';
 }
 
 function loadSchedule(isFull = false) {
@@ -600,58 +554,74 @@ function loadSchedule(isFull = false) {
         const todaySchedule = jadwalRamadan.find(day => day.hari === diffDays);
 
         if (todaySchedule) {
-            const scheduleItems = [
-                { label: 'Imsak', time: todaySchedule.imsak },
-                { label: 'Subuh', time: todaySchedule.subuh },
-                { label: 'Zuhur', time: todaySchedule.zuhur },
-                { label: 'Ashar', time: todaySchedule.asar },
-                { label: 'Maghrib', time: todaySchedule.magrib },
-                { label: 'Isya', time: todaySchedule.isya }
-            ];
-
-            scheduleItems.forEach(item => {
-                const row = document.createElement('div');
-                row.className = 'schedule-row';
-                row.innerHTML = `
-                    <span class="schedule-label">${item.label}</span>
-                    <span class="schedule-time">${item.time}</span>
-                `;
-                scheduleTable.appendChild(row);
-            });
-
-            // Update title with date
-            document.querySelector('.schedule-title').innerText = `Jadwal Imsakiyah Kota Lubuklinggau - Hari ${todaySchedule.hari} (${todaySchedule.tanggal})`;
+          let html = `<table class="jadwal-table" style="width:100%;border-collapse:collapse;background:#fff1;border-radius:8px;overflow:hidden;">
+            <thead>
+              <tr style="background:#ffeb3b;color:#222;">
+                <th colspan="6" style="padding:8px 0;font-size:1.1em;">Hari ${todaySchedule.hari} (${todaySchedule.tanggal})</th>
+              </tr>
+              <tr style="background:#222;color:#fff;">
+                <th>Imsak</th>
+                <th>Subuh</th>
+                <th>Zuhur</th>
+                <th>Ashar</th>
+                <th>Maghrib</th>
+                <th>Isya</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="text-align:center;">
+                <td>${todaySchedule.imsak}</td>
+                <td>${todaySchedule.subuh}</td>
+                <td>${todaySchedule.zuhur}</td>
+                <td>${todaySchedule.asar}</td>
+                <td>${todaySchedule.magrib}</td>
+                <td>${todaySchedule.isya}</td>
+              </tr>
+            </tbody>
+          </table>`;
+          scheduleTable.innerHTML = html;
+          document.querySelector('.schedule-title').innerText = `Jadwal Imsakiyah Kota Lubuklinggau - Hari ${todaySchedule.hari} (${todaySchedule.tanggal})`;
         } else {
-            // Fallback if no schedule found
-            const scheduleData = [
-                { label: 'Imsak', time: '04:50' },
-                { label: 'Subuh', time: '05:00' },
-                { label: 'Zuhur', time: '12:26' },
-                { label: 'Ashar', time: '15:38' },
-                { label: 'Maghrib', time: '18:31' },
-                { label: 'Isya', time: '19:41' }
-            ];
-
-            scheduleData.forEach(item => {
-                const row = document.createElement('div');
-                row.className = 'schedule-row';
-                row.innerHTML = `
-                    <span class="schedule-label">${item.label}</span>
-                    <span class="schedule-time">${item.time}</span>
-                `;
-                scheduleTable.appendChild(row);
-            });
-
-            document.querySelector('.schedule-title').innerText = 'Jadwal Imsakiyah Kota Lubuklinggau - Ramadhan 2026/1447 H';
+          // Fallback if no schedule found
+          let html = `<table class="jadwal-table" style="width:100%;border-collapse:collapse;background:#fff1;border-radius:8px;overflow:hidden;">
+            <thead>
+              <tr style="background:#ffeb3b;color:#222;">
+                <th colspan="6" style="padding:8px 0;font-size:1.1em;">Jadwal Default</th>
+              </tr>
+              <tr style="background:#222;color:#fff;">
+                <th>Imsak</th>
+                <th>Subuh</th>
+                <th>Zuhur</th>
+                <th>Ashar</th>
+                <th>Maghrib</th>
+                <th>Isya</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="text-align:center;">
+                <td>04:50</td>
+                <td>05:00</td>
+                <td>12:26</td>
+                <td>15:38</td>
+                <td>18:31</td>
+                <td>19:41</td>
+              </tr>
+            </tbody>
+          </table>`;
+          scheduleTable.innerHTML = html;
+          document.querySelector('.schedule-title').innerText = 'Jadwal Imsakiyah Kota Lubuklinggau - Ramadhan 2026/1447 H';
         }
     }
 }
 
+
 createStars();
-document.body.style.overflow = 'hidden'; // Default hide scroll
+// document.body.style.overflow = 'hidden'; // Hapus agar scroll selalu aktif
+
 loadSchedule();
 updateCountdown();
 setInterval(updateCountdown, 1000);
+updateClock(); // Mulai update jam real-time
 
 let scheduleVisible = false;
 let userHasToggled = false;
@@ -674,7 +644,7 @@ document.getElementById('viewScheduleBtn').addEventListener('click', function() 
         countdownDiv.style.transform = 'scale(0.5)';
         loadSchedule(true); // true for full schedule
         this.innerText = 'Sembunyikan Jadwal Imsak';
-        document.body.style.overflow = 'auto'; // Allow page scroll
+        // document.body.style.overflow = 'auto'; // Tidak perlu, scroll selalu aktif
     } else {
         scheduleDiv.style.display = 'none';
         clockDiv.classList.remove('fixed');
@@ -683,6 +653,6 @@ document.getElementById('viewScheduleBtn').addEventListener('click', function() 
         clockDiv.style.transform = 'scale(1)';
         countdownDiv.style.transform = 'scale(1)';
         this.innerText = 'Lihat Jadwal Imsak';
-        document.body.style.overflow = 'hidden'; // Hide scroll when schedule hidden
+        // document.body.style.overflow = 'hidden'; // Tidak perlu, scroll selalu aktif
     }
 });
